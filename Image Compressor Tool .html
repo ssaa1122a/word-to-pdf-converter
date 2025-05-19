@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Compressor - Tools Hub</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f8ff;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background-color: #007BFF;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    input[type="file"], select, input[type="range"], button {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    img {
+      width: 100%;
+      margin-top: 1rem;
+      border-radius: 8px;
+    }
+    label {
+      margin-top: 1rem;
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>Image Compressor Tool</header>
+  <div class="container">
+    <input type="file" id="imageInput" accept="image/*" />
+
+    <label for="qualityRange">Compression Quality: <span id="qualityValue">0.7</span></label>
+    <input type="range" id="qualityRange" min="0.1" max="1" step="0.1" value="0.7" />
+
+    <select id="formatSelect">
+      <option value="image/jpeg">JPEG</option>
+      <option value="image/webp">WEBP</option>
+      <option value="image/png">PNG</option>
+    </select>
+
+    <button onclick="compressImage()">Compress Image</button>
+
+    <div id="preview"></div>
+    <a id="downloadLink" style="display:none" download="compressed-image">Download Compressed Image</a>
+  </div>
+
+  <script>
+    const qualityRange = document.getElementById('qualityRange');
+    const qualityValue = document.getElementById('qualityValue');
+
+    qualityRange.addEventListener('input', () => {
+      qualityValue.textContent = qualityRange.value;
+    });
+
+    function compressImage() {
+      const input = document.getElementById('imageInput');
+      const format = document.getElementById('formatSelect').value;
+      const quality = parseFloat(qualityRange.value);
+      const preview = document.getElementById('preview');
+      const downloadLink = document.getElementById('downloadLink');
+
+      if (input.files.length === 0) {
+        alert('Please select an image.');
+        return;
+      }
+
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function () {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+
+          // Use quality only for JPEG or WEBP
+          const useQuality = format === 'image/jpeg' || format === 'image/webp';
+          const dataUrl = canvas.toDataURL(format, useQuality ? quality : undefined);
+
+          preview.innerHTML = `<img src="${dataUrl}" alt="Compressed Preview" />`;
+          downloadLink.href = dataUrl;
+          downloadLink.style.display = 'block';
+          downloadLink.textContent = 'Download Compressed Image';
+        };
+      };
+
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
