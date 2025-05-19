@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Resizer - Tools Hub</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f8ff;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background-color: #007BFF;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    input, button {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    img {
+      width: 100%;
+      margin-top: 1rem;
+      border-radius: 8px;
+    }
+    .row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .row input {
+      flex: 1;
+    }
+    @media (max-width: 600px) {
+      .container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+      .row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>Image Resizer Tool</header>
+  <div class="container">
+    <input type="file" id="imageInput" accept="image/*">
+
+    <div class="row">
+      <input type="number" id="widthInput" placeholder="Width (px)">
+      <input type="number" id="heightInput" placeholder="Height (px)">
+    </div>
+
+    <button onclick="resizeImage()">Resize Image</button>
+
+    <div id="preview"></div>
+    <a id="downloadLink" style="display:none" download="resized-image">Download Resized Image</a>
+  </div>
+
+  <script>
+    function resizeImage() {
+      const input = document.getElementById('imageInput');
+      const width = parseInt(document.getElementById('widthInput').value);
+      const height = parseInt(document.getElementById('heightInput').value);
+      const preview = document.getElementById('preview');
+      const downloadLink = document.getElementById('downloadLink');
+
+      if (!input.files.length || !width || !height) {
+        alert('Please select an image and enter width and height.');
+        return;
+      }
+
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const resizedDataUrl = canvas.toDataURL('image/jpeg');
+          preview.innerHTML = `<img src="${resizedDataUrl}" alt="Resized Preview">`;
+          downloadLink.href = resizedDataUrl;
+          downloadLink.style.display = 'block';
+          downloadLink.textContent = 'Download Resized Image';
+        };
+      };
+
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
