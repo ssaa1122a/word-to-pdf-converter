@@ -1,0 +1,40 @@
+import React, { useState } from "react";
+import axios from "axios";
+
+const FileUpload = () => {
+  const [file, setFile] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState("");
+
+  const handleUpload = async () => {
+    if (!file) return alert("Select a Word file first!");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await axios.post("http://localhost:5000/upload", formData);
+      setPdfUrl(`http://localhost:5000${res.data.downloadUrl}`);
+    } catch (err) {
+      alert("Conversion failed.");
+    }
+  };
+
+  return (
+    <div className="bg-white p-8 rounded shadow w-96">
+      <h2 className="text-xl font-bold mb-4">Word to PDF Converter</h2>
+      <input type="file" accept=".doc,.docx" onChange={(e) => setFile(e.target.files[0])} />
+      <button onClick={handleUpload} className="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
+        Convert
+      </button>
+      {pdfUrl && (
+        <div className="mt-4">
+          <a href={pdfUrl} download className="text-green-600 underline">
+            Download PDF
+          </a>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default FileUpload;
