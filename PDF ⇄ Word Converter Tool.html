@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF ⇄ Word Converter - Tools Hub</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f8ff;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background-color: #007BFF;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    input[type="file"], select, button {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .status {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 1rem;
+      color: green;
+    }
+    @media (max-width: 600px) {
+      .container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>PDF ⇄ Word Converter</header>
+  <div class="container">
+    <select id="conversionType">
+      <option value="pdf-to-word">PDF to Word</option>
+      <option value="word-to-pdf">Word to PDF</option>
+    </select>
+
+    <input type="file" id="fileInput" accept=".pdf,.doc,.docx">
+
+    <button onclick="convertFile()">Convert</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    function convertFile() {
+      const conversionType = document.getElementById('conversionType').value;
+      const fileInput = document.getElementById('fileInput');
+      const status = document.getElementById('status');
+
+      if (!fileInput.files.length) {
+        alert('Please select a file.');
+        return;
+      }
+
+      // Simulate conversion process (In a real scenario, use a backend with LibreOffice or third-party API)
+      status.textContent = 'Processing...';
+
+      setTimeout(() => {
+        const file = fileInput.files[0];
+        const fileName = file.name.split('.')[0];
+        let newExtension = conversionType === 'pdf-to-word' ? 'docx' : 'pdf';
+        const blob = new Blob([file], { type: 'application/octet-stream' });
+
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = `${fileName}-converted.${newExtension}`;
+        downloadLink.click();
+
+        status.textContent = 'Conversion complete. Download started.';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
