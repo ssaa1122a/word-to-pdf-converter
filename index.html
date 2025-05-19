@@ -1,0 +1,65 @@
+export default function HomePage() {
+  return (
+    <div className="min-h-screen bg-blue-50 text-gray-800">
+      {/* Header */}
+      <header className="bg-blue-600 text-white p-4 shadow-md">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Tools Hub</h1>
+          <nav className="space-x-4 text-sm md:text-base">
+            <a href="#tools" className="hover:underline">Tools</a>
+            <a href="#about" className="hover:underline">About</a>
+            <a href="#contact" className="hover:underline">Contact</a>
+          </nav>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="text-center py-20 bg-blue-100 px-4">
+        <h2 className="text-4xl md:text-5xl font-bold text-blue-700 mb-4">
+          Your All-in-One Online Tools Hub
+        </h2>
+        <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
+          Convert, calculate, compress, and more — right from your browser. Fast. Secure. Free.
+        </p>
+        <a
+          href="#tools"
+          className="inline-block bg-blue-600 text-white px-6 py-3 rounded-xl shadow hover:bg-blue-700 transition"
+        >
+          Explore Tools
+        </a>
+      </section>
+
+      {/* Tools Grid */}
+      <section id="tools" className="max-w-6xl mx-auto px-4 py-16">
+        <h3 className="text-2xl font-semibold text-blue-800 mb-8 text-center">
+          Popular Tools
+        </h3>
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          {[
+            'Word to PDF',
+            'Image Compressor',
+            'Unit Converter',
+            'Password Generator',
+            'QR Code Maker',
+            'Text Case Converter',
+          ].map((tool, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition cursor-pointer"
+            >
+              <h4 className="text-lg font-bold text-blue-700 mb-2">{tool}</h4>
+              <p className="text-sm text-gray-600">
+                Easily use the {tool} tool online. Fast, simple and secure.
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-blue-600 text-white text-center py-6">
+        <p className="text-sm">&copy; {new Date().getFullYear()} Tools Hub. All rights reserved.</p>
+      </footer>
+    </div>
+  );
+}
