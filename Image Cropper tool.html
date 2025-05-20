@@ -100,7 +100,7 @@
         }
 
         .editor-section {
-            display: flex;
+            display: none;
             flex-direction: column;
             gap: 20px;
         }
@@ -306,13 +306,13 @@
                     <div class="upload-icon">📁</div>
                     <h3 class="upload-text">Drag & Drop your image here</h3>
                     <p>or</p>
-                    <button class="upload-btn" id="uploadBtn">Browse Files</button>
+                    <button class="upload-btn" id="uploadBtn" type="button">Browse Files</button>
                     <input type="file" id="fileInput" accept="image/*" style="display: none;">
                 </div>
                 <div class="status" id="statusMessage"></div>
             </div>
 
-            <div class="editor-section" id="editorSection" style="display: none;">
+            <div class="editor-section" id="editorSection">
                 <div class="editor-container">
                     <div class="image-preview">
                         <img id="previewImage" class="preview-image" alt="Preview">
@@ -380,12 +380,43 @@
             let quality = 0.9;
             
             // Event listeners
-            uploadArea.addEventListener('click', () => fileInput.click());
-            uploadBtn.addEventListener('click', () => fileInput.click());
+            uploadBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent the upload area click from triggering
+                fileInput.click();
+            });
+            
+            uploadArea.addEventListener('click', function(e) {
+                // Only trigger file input if the click wasn't on a child element
+                if (e.target === uploadArea) {
+                    fileInput.click();
+                }
+            });
             
             fileInput.addEventListener('change', handleFileSelect);
-            uploadArea.addEventListener('dragover', handleDragOver);
-            uploadArea.addEventListener('drop', handleDrop);
+            
+            // Improved drag and drop handling
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadArea.style.backgroundColor = 'var(--primary-light)';
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadArea.style.backgroundColor = '';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadArea.style.backgroundColor = '';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect({ dataTransfer: { files: files } });
+                }
+            });
             
             qualitySlider.addEventListener('input', updateQuality);
             downloadBtn.addEventListener('click', downloadImage);
@@ -401,30 +432,7 @@
             
             // Functions
             function handleFileSelect(e) {
-                const file = e.target.files[0] || (e.dataTransfer && e.dataTransfer.files[0]);
-                if (!file) return;
-                
-                if (!file.type.match('image.*')) {
-                    showStatus('Please select an image file', 'error');
-                    return;
-                }
-                
-                currentFile = file;
-                processImage(file);
-            }
-            
-            function handleDragOver(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                uploadArea.style.backgroundColor = 'var(--primary-light)';
-            }
-            
-            function handleDrop(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                uploadArea.style.backgroundColor = '';
-                
-                const file = e.dataTransfer.files[0];
+                const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
                 if (!file) return;
                 
                 if (!file.type.match('image.*')) {
@@ -442,7 +450,7 @@
                 reader.onload = function(e) {
                     previewImage.src = e.target.result;
                     previewImage.style.display = 'block';
-                    editorSection.style.display = 'block';
+                    editorSection.style.display = 'flex';
                     
                     // Initialize cropper after image is loaded
                     previewImage.onload = function() {
@@ -466,6 +474,10 @@
                         
                         showStatus('Image loaded successfully!', 'success');
                     };
+                };
+                
+                reader.onerror = function() {
+                    showStatus('Error reading the image file', 'error');
                 };
                 
                 reader.readAsDataURL(file);
