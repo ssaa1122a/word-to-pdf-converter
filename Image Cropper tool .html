@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Cropper Tool</title>
+    <style>
+        :root {
+            --primary-color: #0066ff;
+            --primary-light: #e6f0ff;
+            --white: #ffffff;
+            --gray: #f5f5f5;
+            --dark-gray: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--white);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .tool-description {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .tool-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .upload-section {
+            background-color: var(--gray);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary-color);
+            border-radius: 8px;
+            padding: 40px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            background-color: var(--primary-light);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            margin-bottom: 10px;
+        }
+
+        .upload-btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #0052cc;
+        }
+
+        .editor-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .editor-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .editor-container {
+                flex-direction: row;
+            }
+        }
+
+        .image-preview {
+            flex: 1;
+            background-color: var(--gray);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+
+        .controls {
+            flex: 0 0 300px;
+            background-color: var(--gray);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group h3 {
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            outline: none;
+            border-radius: 4px;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .format-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .format-btn {
+            background-color: var(--white);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .format-btn:hover, .format-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .download-btn:hover {
+            background-color: #0052cc;
+        }
+
+        .reset-btn {
+            background-color: #ff4d4d;
+            color: var(--white);
+        }
+
+        .reset-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+        }
+
+        /* Cropper.js overrides */
+        .cropper-view-box, .cropper-face {
+            border-radius: 50%;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 767px) {
+            .upload-section {
+                padding: 20px 15px;
+            }
+            
+            .controls {
+                flex: 0 0 auto;
+            }
+            
+            .action-btns {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Image Cropper Tool</h1>
+            <p class="tool-description">Upload, crop, and convert your images to different formats with ease</p>
+        </header>
+
+        <div class="tool-container">
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <h3 class="upload-text">Drag & Drop your image here</h3>
+                    <p>or</p>
+                    <button class="upload-btn" id="uploadBtn">Browse Files</button>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                <div class="status" id="statusMessage"></div>
+            </div>
+
+            <div class="editor-section" id="editorSection" style="display: none;">
+                <div class="editor-container">
+                    <div class="image-preview">
+                        <img id="previewImage" class="preview-image" alt="Preview">
+                    </div>
+                    <div class="controls">
+                        <div class="control-group">
+                            <h3>Crop</h3>
+                            <p>Drag the corners to crop your image</p>
+                        </div>
+
+                        <div class="control-group">
+                            <h3>Output Format</h3>
+                            <div class="format-options">
+                                <button class="format-btn active" data-format="png">PNG</button>
+                                <button class="format-btn" data-format="jpeg">JPEG</button>
+                                <button class="format-btn" data-format="webp">WEBP</button>
+                                <button class="format-btn" data-format="gif">GIF</button>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <h3>Quality</h3>
+                            <div class="slider-container">
+                                <input type="range" min="1" max="100" value="90" class="slider" id="qualitySlider">
+                                <span id="qualityValue">90%</span>
+                            </div>
+                        </div>
+
+                        <div class="action-btns">
+                            <button class="action-btn download-btn" id="downloadBtn">Download Image</button>
+                            <button class="action-btn reset-btn" id="resetBtn">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Part of Multi-Tool Website | © 2023 All Rights Reserved</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const uploadArea = document.getElementById('uploadArea');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const fileInput = document.getElementById('fileInput');
+            const editorSection = document.getElementById('editorSection');
+            const previewImage = document.getElementById('previewImage');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const qualitySlider = document.getElementById('qualitySlider');
+            const qualityValue = document.getElementById('qualityValue');
+            const formatBtns = document.querySelectorAll('.format-btn');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // Variables
+            let cropper;
+            let currentFile;
+            let selectedFormat = 'png';
+            let quality = 0.9;
+            
+            // Event listeners
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('drop', handleDrop);
+            
+            qualitySlider.addEventListener('input', updateQuality);
+            downloadBtn.addEventListener('click', downloadImage);
+            resetBtn.addEventListener('click', resetTool);
+            
+            formatBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    formatBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedFormat = btn.dataset.format;
+                });
+            });
+            
+            // Functions
+            function handleFileSelect(e) {
+                const file = e.target.files[0] || (e.dataTransfer && e.dataTransfer.files[0]);
+                if (!file) return;
+                
+                if (!file.type.match('image.*')) {
+                    showStatus('Please select an image file', 'error');
+                    return;
+                }
+                
+                currentFile = file;
+                processImage(file);
+            }
+            
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadArea.style.backgroundColor = 'var(--primary-light)';
+            }
+            
+            function handleDrop(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadArea.style.backgroundColor = '';
+                
+                const file = e.dataTransfer.files[0];
+                if (!file) return;
+                
+                if (!file.type.match('image.*')) {
+                    showStatus('Please select an image file', 'error');
+                    return;
+                }
+                
+                currentFile = file;
+                processImage(file);
+            }
+            
+            function processImage(file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                    editorSection.style.display = 'block';
+                    
+                    // Initialize cropper after image is loaded
+                    previewImage.onload = function() {
+                        if (cropper) {
+                            cropper.destroy();
+                        }
+                        
+                        cropper = new Cropper(previewImage, {
+                            aspectRatio: NaN, // Free ratio
+                            viewMode: 1,
+                            autoCropArea: 0.8,
+                            responsive: true,
+                            restore: true,
+                            guides: true,
+                            center: true,
+                            highlight: true,
+                            cropBoxMovable: true,
+                            cropBoxResizable: true,
+                            toggleDragModeOnDblclick: false,
+                        });
+                        
+                        showStatus('Image loaded successfully!', 'success');
+                    };
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            function updateQuality() {
+                quality = qualitySlider.value / 100;
+                qualityValue.textContent = `${qualitySlider.value}%`;
+            }
+            
+            function downloadImage() {
+                if (!cropper) return;
+                
+                // Get the cropped canvas
+                const canvas = cropper.getCroppedCanvas({
+                    width: previewImage.naturalWidth,
+                    height: previewImage.naturalHeight,
+                    minWidth: 256,
+                    minHeight: 256,
+                    maxWidth: 4096,
+                    maxHeight: 4096,
+                    fillColor: '#fff',
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                });
+                
+                if (!canvas) {
+                    showStatus('Error creating cropped image', 'error');
+                    return;
+                }
+                
+                // Convert to selected format
+                let mimeType;
+                switch (selectedFormat) {
+                    case 'jpeg':
+                        mimeType = 'image/jpeg';
+                        break;
+                    case 'webp':
+                        mimeType = 'image/webp';
+                        break;
+                    case 'gif':
+                        mimeType = 'image/gif';
+                        break;
+                    default:
+                        mimeType = 'image/png';
+                }
+                
+                // Convert canvas to blob
+                canvas.toBlob(function(blob) {
+                    if (!blob) {
+                        showStatus('Error creating image blob', 'error');
+                        return;
+                    }
+                    
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `cropped-image.${selectedFormat}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        showStatus('Image downloaded successfully!', 'success');
+                    }, 100);
+                }, mimeType, quality);
+            }
+            
+            function resetTool() {
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                
+                previewImage.src = '';
+                previewImage.style.display = 'none';
+                editorSection.style.display = 'none';
+                fileInput.value = '';
+                currentFile = null;
+                
+                // Reset format and quality
+                formatBtns.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.format-btn[data-format="png"]').classList.add('active');
+                selectedFormat = 'png';
+                
+                qualitySlider.value = 90;
+                quality = 0.9;
+                qualityValue.textContent = '90%';
+                
+                showStatus('Tool reset successfully', 'success');
+            }
+            
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status ' + type;
+                statusMessage.style.display = 'block';
+                
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
