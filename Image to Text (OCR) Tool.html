@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Tool | Multi-Tool Website</title>
+    <style>
+        :root {
+            --primary-dark: #8B0000;
+            --primary-light: #FF6347;
+            --bg-dark: #121212;
+            --bg-light: #1E1E1E;
+            --text-light: #FFFFFF;
+            --text-muted: #CCCCCC;
+            --success: #4CAF50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--primary-dark);
+        }
+
+        h1 {
+            color: var(--primary-light);
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .tool-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .upload-section {
+            background-color: var(--bg-light);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary-dark);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-light);
+            background-color: rgba(139, 0, 0, 0.1);
+        }
+
+        .upload-area i {
+            font-size: 48px;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+        }
+
+        .upload-area p {
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background-color: var(--primary-dark);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--primary-dark);
+            color: var(--primary-light);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(139, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+
+        .options-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--primary-dark);
+            border-radius: 5px;
+            color: var(--text-light);
+        }
+
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .image-preview, .text-preview {
+            flex: 1;
+            min-width: 300px;
+            background-color: var(--bg-light);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--primary-dark);
+        }
+
+        .preview-title {
+            color: var(--primary-light);
+        }
+
+        .preview-content {
+            height: 300px;
+            overflow: auto;
+            padding: 10px;
+            background-color: var(--bg-dark);
+            border-radius: 5px;
+            position: relative;
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #textOutput {
+            white-space: pre-wrap;
+            color: var(--text-light);
+            line-height: 1.6;
+            font-family: monospace;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .text-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .text-action-btn {
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .text-action-btn:hover {
+            background: var(--primary-light);
+            transform: scale(1.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-light);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .upload-section {
+                padding: 20px;
+            }
+            
+            .upload-area {
+                padding: 30px 15px;
+            }
+            
+            .preview-container {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Image to Text (OCR) Tool</h1>
+            <p class="description">Extract text from images with our powerful OCR technology. Upload any image containing text and get editable text output in various formats.</p>
+        </header>
+
+        <div class="tool-container">
+            <div class="upload-section">
+                <div class="upload-area" id="dropArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Drag & Drop Image Here</h3>
+                    <p>or click to browse files</p>
+                    <input type="file" id="fileInput" accept="image/*" class="hidden">
+                    <button class="btn" id="browseBtn">
+                        <i class="fas fa-folder-open"></i> Select Image
+                    </button>
+                </div>
+
+                <div class="options-section">
+                    <div class="option-group">
+                        <label for="outputFormat">Output Format</label>
+                        <select id="outputFormat">
+                            <option value="plain">Plain Text</option>
+                            <option value="word">Microsoft Word</option>
+                            <option value="pdf">PDF Document</option>
+                            <option value="json">JSON</option>
+                            <option value="html">HTML</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="language">Language</label>
+                        <select id="language">
+                            <option value="eng">English</option>
+                            <option value="spa">Spanish</option>
+                            <option value="fra">French</option>
+                            <option value="deu">German</option>
+                            <option value="hin">Hindi</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <div class="preview-container">
+                    <div class="image-preview">
+                        <div class="preview-header">
+                            <h3 class="preview-title">Image Preview</h3>
+                        </div>
+                        <div class="preview-content">
+                            <img id="imagePreview" src="" alt="Uploaded Image Preview">
+                        </div>
+                    </div>
+
+                    <div class="text-preview">
+                        <div class="preview-header">
+                            <h3 class="preview-title">Extracted Text</h3>
+                        </div>
+                        <div class="preview-content">
+                            <div class="text-actions">
+                                <button class="text-action-btn" id="copyTextBtn" title="Copy Text">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="text-action-btn" id="clearTextBtn" title="Clear Text">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <pre id="textOutput">Your extracted text will appear here...</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="downloadBtn">
+                        <i class="fas fa-download"></i> Download Text
+                    </button>
+                    <button class="btn" id="copyAllBtn">
+                        <i class="fas fa-copy"></i> Copy All Text
+                    </button>
+                    <button class="btn btn-secondary" id="resetBtn">
+                        <i class="fas fa-redo"></i> Process Another
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Text copied to clipboard!</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('fileInput');
+            const browseBtn = document.getElementById('browseBtn');
+            const previewSection = document.getElementById('previewSection');
+            const imagePreview = document.getElementById('imagePreview');
+            const textOutput = document.getElementById('textOutput');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const copyAllBtn = document.getElementById('copyAllBtn');
+            const copyTextBtn = document.getElementById('copyTextBtn');
+            const clearTextBtn = document.getElementById('clearTextBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const outputFormat = document.getElementById('outputFormat');
+            const language = document.getElementById('language');
+            const toast = document.getElementById('toast');
+
+            let currentFile = null;
+            let extractedText = '';
+
+            // Handle drag and drop events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropArea.style.borderColor = '#FF6347';
+                dropArea.style.backgroundColor = 'rgba(139, 0, 0, 0.2)';
+            }
+
+            function unhighlight() {
+                dropArea.style.borderColor = '#8B0000';
+                dropArea.style.backgroundColor = 'transparent';
+            }
+
+            // Handle file drop
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length) {
+                    handleFiles(files);
+                }
+            }
+
+            // Handle file selection via button
+            browseBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    handleFiles(fileInput.files);
+                }
+            });
+
+            // Process the selected file
+            function handleFiles(files) {
+                currentFile = files[0];
+                if (!currentFile.type.match('image.*')) {
+                    alert('Please select an image file (JPEG, PNG, etc.)');
+                    return;
+                }
+
+                // Display image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewSection.style.display = 'block';
+                    dropArea.style.display = 'none';
+                    
+                    // Scroll to preview section
+                    previewSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Process OCR
+                    processOCR(currentFile);
+                };
+                reader.readAsDataURL(currentFile);
+            }
+
+            // Perform OCR using Tesseract.js
+            function processOCR(file) {
+                const lang = language.value;
+                const originalDownloadBtnText = downloadBtn.innerHTML;
+                
+                // Show loading state
+                downloadBtn.innerHTML = '<span class="loading"></span> Processing...';
+                downloadBtn.disabled = true;
+                copyAllBtn.disabled = true;
+                
+                textOutput.textContent = 'Extracting text... Please wait.';
+
+                Tesseract.recognize(
+                    file,
+                    lang,
+                    {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                textOutput.textContent = `Progress: ${Math.round(m.progress * 100)}%`;
+                            }
+                        }
+                    }
+                ).then(({ data: { text } }) => {
+                    extractedText = text;
+                    textOutput.textContent = text;
+                    
+                    // Restore buttons
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Text';
+                    downloadBtn.disabled = false;
+                    copyAllBtn.disabled = false;
+                }).catch(err => {
+                    console.error(err);
+                    textOutput.textContent = 'Error occurred during text extraction. Please try again.';
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Text';
+                    downloadBtn.disabled = false;
+                    copyAllBtn.disabled = false;
+                });
+            }
+
+            // Download extracted text
+            downloadBtn.addEventListener('click', () => {
+                if (!extractedText) {
+                    alert('No text to download. Please process an image first.');
+                    return;
+                }
+
+                const format = outputFormat.value;
+                let blob, filename, mimeType;
+
+                switch(format) {
+                    case 'word':
+                        // Simple implementation for Word - would need more robust solution in production
+                        const wordContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                            <head><title>Extracted Text</title></head>
+                            <body>${extractedText.replace(/\n/g, '<br>')}</body></html>`;
+                        blob = new Blob(['\ufeff', wordContent], { type: 'application/msword' });
+                        filename = 'extracted-text.doc';
+                        break;
+                    case 'pdf':
+                        // PDF would require a library like jsPDF in a real implementation
+                        alert('PDF export would require additional libraries in a production environment.');
+                        return;
+                    case 'json':
+                        blob = new Blob([JSON.stringify({ text: extractedText }, null, 2)], { type: 'application/json' });
+                        filename = 'extracted-text.json';
+                        break;
+                    case 'html':
+                        blob = new Blob([`<!DOCTYPE html><html><head><title>Extracted Text</title></head><body><pre>${extractedText}</pre></body></html>`], { type: 'text/html' });
+                        filename = 'extracted-text.html';
+                        break;
+                    default: // plain text
+                        blob = new Blob([extractedText], { type: 'text/plain' });
+                        filename = 'extracted-text.txt';
+                }
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            // Copy all text
+            copyAllBtn.addEventListener('click', () => {
+                copyToClipboard(extractedText);
+            });
+
+            // Copy text from preview
+            copyTextBtn.addEventListener('click', () => {
+                copyToClipboard(textOutput.textContent);
+            });
+
+            // Clear text
+            clearTextBtn.addEventListener('click', () => {
+                textOutput.textContent = '';
+                extractedText = '';
+            });
+
+            // Copy helper function
+            function copyToClipboard(text) {
+                if (!text || text === 'Your extracted text will appear here...') {
+                    showToast('No text to copy');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Text copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    showToast('Failed to copy text');
+                });
+            }
+
+            // Show toast notification
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            // Reset the tool
+            resetBtn.addEventListener('click', () => {
+                currentFile = null;
+                extractedText = '';
+                imagePreview.src = '';
+                textOutput.textContent = 'Your extracted text will appear here...';
+                previewSection.style.display = 'none';
+                dropArea.style.display = 'block';
+                fileInput.value = '';
+            });
+        });
+    </script>
+</body>
+</html>
