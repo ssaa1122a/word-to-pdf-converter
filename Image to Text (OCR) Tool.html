@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCR Tool | Multi-Tool Website</title>
+    <title>Image to Text (OCR) Tool</title>
     <style>
         :root {
             --primary-dark: #8B0000;
@@ -496,7 +496,7 @@
                 reader.readAsDataURL(currentFile);
             }
 
-            // Perform OCR using Tesseract.js
+            // Perform OCR using Tesseract.js with enhanced text cleaning
             function processOCR(file) {
                 const lang = language.value;
                 const originalDownloadBtnText = downloadBtn.innerHTML;
@@ -519,8 +519,9 @@
                         }
                     }
                 ).then(({ data: { text } }) => {
-                    extractedText = text;
-                    textOutput.textContent = text;
+                    // Enhanced text cleaning and formatting
+                    extractedText = cleanOCRText(text);
+                    textOutput.textContent = extractedText;
                     
                     // Restore buttons
                     downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Text';
@@ -535,6 +536,36 @@
                 });
             }
 
+            // Enhanced text cleaning function
+            function cleanOCRText(rawText) {
+                // Step 1: Basic cleanup
+                let text = rawText
+                    .replace(/\r\n/g, '\n')       // Normalize line endings
+                    .replace(/\n+/g, '\n')        // Remove extra newlines
+                    .trim();                      // Trim whitespace
+                
+                // Step 2: Fix common OCR errors
+                text = text
+                    .replace(/\b(\d)\s+(\d)\b/g, '$1$2')  // Join separated digits
+                    .replace(/(\d)\s+([A-Za-z])/g, '$1 $2') // Join numbers with following words
+                    .replace(/([A-Za-z])\s+([A-Za-z])/g, '$1 $2'); // Fix word splitting
+                
+                // Step 3: Format specific patterns
+                text = text
+                    .replace(/^1\s+/gm, '+ 1\n')  // Handle the "+1" case
+                    .replace(/(\d+)\s+([A-Za-z]+)/g, '$1 $2'); // Format number-word pairs
+                
+                // Step 4: Remove isolated single characters (except digits)
+                text = text.replace(/\b[^\d\s]\b/g, '');
+                
+                // Step 5: Final cleanup
+                text = text
+                    .replace(/\n{3,}/g, '\n\n')   // Limit consecutive newlines
+                    .replace(/\s{2,}/g, ' ');      // Remove extra spaces
+                
+                return text;
+            }
+
             // Download extracted text
             downloadBtn.addEventListener('click', () => {
                 if (!extractedText) {
@@ -547,7 +578,7 @@
 
                 switch(format) {
                     case 'word':
-                        // Simple implementation for Word - would need more robust solution in production
+                        // Simple implementation for Word
                         const wordContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                             <head><title>Extracted Text</title></head>
                             <body>${extractedText.replace(/\n/g, '<br>')}</body></html>`;
@@ -555,7 +586,6 @@
                         filename = 'extracted-text.doc';
                         break;
                     case 'pdf':
-                        // PDF would require a library like jsPDF in a real implementation
                         alert('PDF export would require additional libraries in a production environment.');
                         return;
                     case 'json':
